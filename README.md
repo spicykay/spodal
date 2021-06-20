@@ -1,2 +1,6 @@
-# spodal
-Spotify Data Analyzer 
+# Spodal 🎵
+Spotify Data Analyzer
+
+```
+// TODO: 🛠 💻 🏗 🔥
+```
