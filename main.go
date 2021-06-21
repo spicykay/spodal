@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/zmb3/spotify"
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -32,8 +34,9 @@ func authenticateApplication() {
 	}
 }
 
-func authenticateUser() {
-	redirectURL := "http://www.spodal.xyz"
+func authenticateUser(c *gin.Context) {
+	redirectURL := "http://localhost:8080/authentication_callback"
+	authSessionID := uuid.NewString()
 	auth := spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate)
 	clientId := os.Getenv("SPOTIFY_ID")
 	clientSecret := os.Getenv("SPOTIFY_SECRET")
@@ -42,10 +45,28 @@ func authenticateUser() {
 
 	// get the user to this URL - how you do that is up to you
 	// you should specify a unique state string to identify the session
-	url := auth.AuthURL("state")
+	url := auth.AuthURL(authSessionID)
 	fmt.Printf("url %s", url)
+	c.JSON(200, gin.H{
+		"redirectURI": url,
+	})
+}
+
+/*
+https://example.com/callback?code=NApCCg..BkWtQ&state=profile%2Factivity
+*/
+func authenticationCallbackHandler(c *gin.Context) {
+	code := c.Query("code")
+	state := c.Query("state")
+	c.JSON(200, gin.H{
+		"code":  code,
+		"state": state,
+	})
 }
 
 func main() {
-	authenticateUser()
+	r := gin.Default()
+	r.GET("/authenticate_user", authenticateUser)
+	r.GET("/authentication_callback", authenticationCallbackHandler)
+	r.Run()
 }
