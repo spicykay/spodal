@@ -12,6 +12,8 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
+var auth spotify.Authenticator
+
 func authenticateApplication() {
 	config := &clientcredentials.Config{
 		ClientID:     os.Getenv("SPOTIFY_ID"),
@@ -37,7 +39,7 @@ func authenticateApplication() {
 func authenticateUser(c *gin.Context) {
 	redirectURL := "http://localhost:8080/authentication_callback"
 	authSessionID := uuid.NewString()
-	auth := spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate)
+	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate)
 	clientId := os.Getenv("SPOTIFY_ID")
 	clientSecret := os.Getenv("SPOTIFY_SECRET")
 
@@ -58,9 +60,33 @@ https://example.com/callback?code=NApCCg..BkWtQ&state=profile%2Factivity
 func authenticationCallbackHandler(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
+	// Error Validation
+	respondWithError := func() {
+		c.JSON(400, gin.H{
+			"error": "Something went wrong",
+		})
+	}
+
+	if code == "" || state == "" {
+		respondWithError()
+	}
+
+	token, err := auth.Token(state, c.Request)
+	if err != nil {
+		respondWithError()
+	}
+
+	client := auth.NewClient(token)
+
+	playlists, err := client.CurrentUsersPlaylists()
+	if err != nil {
+		log.Fatalf("couldn't get features playlists: %v", err)
+	}
+
 	c.JSON(200, gin.H{
-		"code":  code,
-		"state": state,
+		"code":      code,
+		"state":     state,
+		"playlists": playlists.Playlists,
 	})
 }
 
