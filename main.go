@@ -83,10 +83,24 @@ func authenticationCallbackHandler(c *gin.Context) {
 		log.Fatalf("couldn't get features playlists: %v", err)
 	}
 
+	playlist, err := client.GetPlaylist("5RNYT8gwRxXejbNnrEPz6F")
+
+	var trackMeta *spotify.AudioFeatures
+	for _, track := range playlist.Tracks.Tracks {
+		println("Hello")
+		trackInfo, err := client.GetAudioFeatures(track.Track.ID)
+		if err != nil {
+			log.Fatalf("failed to get metadata")
+		}
+		trackMeta = trackInfo[0]
+	}
+
 	c.JSON(200, gin.H{
-		"code":      code,
-		"state":     state,
-		"playlists": playlists.Playlists,
+		"code":         code,
+		"state":        state,
+		"playlists":    playlists.Playlists,
+		"playlistInfo": playlist,
+		"metadata":     trackMeta,
 	})
 }
 
