@@ -1,0 +1,16 @@
+[
+  {
+    "name": "inspire",
+    "path": "/inspire",
+    "component": "/Users/KartikAyalasomayajula/dev/spotify/spodal/client/pages/inspire.vue",
+    "chunkName": "pages/inspire",
+    "_name": "_59bc0b5a"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "/Users/KartikAyalasomayajula/dev/spotify/spodal/client/pages/index.vue",
+    "chunkName": "pages/index",
+    "_name": "_20dc0eea"
+  }
+]
